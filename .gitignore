@@ -1,0 +1,35 @@
+# ─── Python (FastAPI backend) ─────────────────────────────────────────────
+# Virtual environment
+backend/venv/
+backend/.venv/
+
+# Byte-compiled / cached files
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+
+# dotenv
+backend/.env
+
+# ─── Node.js (Vite + React + Tailwind frontend) ────────────────────────────
+frontend/node_modules/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# dotenv variants
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+
+# ─── Editor & OS ────────────────────────────────────────────────────────────
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
