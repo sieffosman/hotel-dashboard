@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import type { RoomRead, RoomUpdate } from '../types';
+import Popup from './Popup';
 
 export default function RoomDetails() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +24,10 @@ export default function RoomDetails() {
     if (!id) return;
     api.get<RoomRead>(`/rooms/${id}`)
       .then(r => {
+        console.log('🔍 Room data from API:', r.data);
+        console.log('🖼️ Image URL from database:', r.data.image_url);
+        console.log('🌐 Full image URL will be:', `http://localhost:8000${r.data.image_url}`);
+        
         setRoom(r.data);
         setFormData({
           name: r.data.name || '',
@@ -100,6 +105,23 @@ export default function RoomDetails() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Sidebar */}
+      <div className="fixed left-0 top-0 w-16 h-full bg-gray-800 flex flex-col items-center py-4">
+        <div className="w-8 h-8 bg-gray-600 mb-8 flex items-center justify-center">
+          <span className="text-white text-xs font-bold">H</span>
+        </div>
+        <div className="text-white text-xs">HUGO</div>
+        <div className="text-gray-400 text-xs mt-1">CATERBURY</div>
+        
+        <div className="mt-8">
+          <button 
+            onClick={() => nav('/rooms')}
+            className="flex items-center gap-2 text-white hover:text-red-400 text-sm"
+          >
+            🏠 Room list
+          </button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="ml-16 p-8">
@@ -122,7 +144,7 @@ export default function RoomDetails() {
               <h2 className="text-lg font-medium text-gray-900">Room details</h2>
               <div className="flex items-center gap-2">
                 <img 
-                  src="../../assets/deleteIcon.png" 
+                  src="/frontend/assets/deleteIcon.png" 
                   alt="Delete" 
                   className="w-4 h-4"
                 />
@@ -170,11 +192,21 @@ export default function RoomDetails() {
                     alt="Room preview"
                     className="w-48 h-32 object-cover border border-gray-200 rounded"
                   />
+                  <div className="flex items-center gap-3 mt-3">
+                    <img 
+                      src="/frontend/assets/plusIcon.png" 
+                      alt="Add" 
+                      className="w-6 h-6"
+                    />
+                    <button className="text-red-600 hover:text-red-700 text-sm font-medium">
+                      CHANGE IMAGE
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
                   <img 
-                    src="../../assets/plusIcon.png" 
+                    src="/frontend/assets/plusIcon.png" 
                     alt="Add" 
                     className="w-6 h-6"
                   />
@@ -205,7 +237,7 @@ export default function RoomDetails() {
             {/* Add Facility */}
             <div className="flex items-center gap-3 mb-8">
               <img 
-                src="../../assets/plusIcon.png" 
+                src="/frontend/assets/plusIcon.png" 
                 alt="Add" 
                 className="w-6 h-6"
               />
@@ -257,7 +289,7 @@ export default function RoomDetails() {
             >
               DOWNLOAD PDF
               <img 
-                src="../../assets/downloadIcon.png" 
+                src="/frontend/assets/downloadIcon.png" 
                 alt="Download" 
                 className="w-4 h-4"
               />
@@ -266,28 +298,14 @@ export default function RoomDetails() {
         </div>
       </div>
 
-      {/* Delete Confirmation Popup - You'll need to create this component */}
+      {/* Delete Confirmation Popup */}
       {showDeletePopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-medium mb-4">Are you sure?</h3>
-            <p className="text-gray-600 mb-6">You are deleting a room...</p>
-            <div className="flex gap-4">
-              <button
-                onClick={handleDelete}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-              >
-                Yes, Delete
-              </button>
-              <button
-                onClick={() => setShowDeletePopup(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <Popup
+          title="Are you sure?"
+          message="You are deleting a room..."
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeletePopup(false)}
+        />
       )}
     </div>
   );
