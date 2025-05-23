@@ -1,4 +1,3 @@
-// src/components/RoomDetails.tsx
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
@@ -15,7 +14,6 @@ export default function RoomDetails() {
   const [error, setError] = useState<string | null>(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
 
-  // Form state for editing (if you allow edits)
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -30,7 +28,6 @@ export default function RoomDetails() {
     facilities: [],
   });
 
-  // Load room on mount
   useEffect(() => {
     if (!id) return;
     api
@@ -49,7 +46,6 @@ export default function RoomDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Handlers for text fields (if you support editing here)
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -68,7 +64,6 @@ export default function RoomDetails() {
     setFormData((prev) => ({ ...prev, facilities: [...prev.facilities, ""] }));
   };
 
-  // Handle deleting
   const handleDelete = async () => {
     if (!id) return;
     try {
@@ -79,7 +74,6 @@ export default function RoomDetails() {
     }
   };
 
-  // Download the PDF as a blob and trigger browser save
   const handleDownloadPdf = async () => {
     if (!id) return;
     try {
@@ -102,13 +96,11 @@ export default function RoomDetails() {
     }
   };
 
-  // Show loading / error
   if (loading) return <div className="p-8 text-gray-600">Loading…</div>;
   if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Main Content */}
       <div className="ml-16 p-8">
         <h1 className="text-2xl font-normal text-gray-900 mb-4">
           Room details
@@ -121,7 +113,6 @@ export default function RoomDetails() {
         </button>
 
         <div className="grid grid-cols-3 gap-8">
-          {/* Left Column */}
           <div className="col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-medium text-gray-900">
@@ -140,7 +131,6 @@ export default function RoomDetails() {
               </button>
             </div>
 
-            {/* Title */}
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-2">Title</label>
               <input
@@ -152,7 +142,6 @@ export default function RoomDetails() {
               />
             </div>
 
-            {/* Description */}
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-2">
                 Description
@@ -165,7 +154,6 @@ export default function RoomDetails() {
               />
             </div>
 
-            {/* Image Preview */}
             <div className="mb-6">
               <label className="block text-sm text-gray-600 mb-2">Image</label>
               {formData.image_url ? (
@@ -257,7 +245,6 @@ export default function RoomDetails() {
               </button>
             </div>
 
-            {/* Error */}
             {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
 
             {/* SAVE & GENERATE PDF (edits + PDF) */}

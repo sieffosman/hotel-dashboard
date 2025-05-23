@@ -1,6 +1,3 @@
-// frontend/src/components/Popup.tsx
-import React from "react";
-
 interface PopupProps {
   title: string;
   message: string;

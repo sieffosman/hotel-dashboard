@@ -1,4 +1,3 @@
-# ─── Python (FastAPI backend) ─────────────────────────────────────────────
 # Virtual environment
 backend/venv/
 backend/.venv/
@@ -11,7 +10,7 @@ backend/.venv/
 # dotenv
 backend/.env
 
-# ─── Node.js (Vite + React + Tailwind frontend) ────────────────────────────
+#  Node.js (Vite + React + Tailwind frontend) 
 frontend/node_modules/
 
 # Build outputs
@@ -24,7 +23,7 @@ frontend/.env.local
 frontend/.env.development.local
 frontend/.env.production.local
 
-# ─── Editor & OS ────────────────────────────────────────────────────────────
+#  Editor & OS 
 # VS Code
 .vscode/
 

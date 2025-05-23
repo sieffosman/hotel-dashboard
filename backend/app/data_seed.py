@@ -6,10 +6,8 @@ import os
 
 def seed_initial_data():
     with Session(engine) as session:
-        # fetch existing rooms
         rooms = session.exec(select(Room)).all()
         if not rooms:
-            # Create permanent folder if it doesn't exist
             os.makedirs("uploads/rooms/permanent", exist_ok=True)
 
             sample_rooms = [
@@ -18,7 +16,7 @@ def seed_initial_data():
                     description="Two spacious bedrooms with kingsized beds, full bathroom, kitchen and living area set across two levels.",
                     capacity=4,
                     facilities_count=14,
-                    image_url="/uploads/rooms/permanent/theHugoHotelTheApartment.webp",  # ✅ Added leading /
+                    image_url="/uploads/rooms/permanent/theHugoHotelTheApartment.webp",
                     created_at="17/03/25",
                     updated_at="18/03/25",
                 ),
@@ -36,7 +34,7 @@ def seed_initial_data():
                     description="Luxury and comfort with double bed, walk-in shower and daily servicing.",
                     capacity=2,
                     facilities_count=12,
-                    image_url="/uploads/rooms/permanent/theHugoHotelLuxuryDoubleRoom.webp",  # ✅ Added leading /
+                    image_url="/uploads/rooms/permanent/theHugoHotelLuxuryDoubleRoom.webp", 
                     created_at="17/03/25",
                     updated_at="-",
                 ),
@@ -45,7 +43,7 @@ def seed_initial_data():
                     description="Modern luxury with kingsized bed, walk-in shower, double sinks, sitting area and air conditioning.",
                     capacity=2,
                     facilities_count=12,
-                    image_url="/uploads/rooms/permanent/theHugoHotelKingJuniorSuite.webp",  # ✅ Added leading /
+                    image_url="/uploads/rooms/permanent/theHugoHotelKingJuniorSuite.webp", 
                     created_at="17/03/25",
                     updated_at="-",
                 ),

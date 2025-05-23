@@ -23,8 +23,6 @@ def update_room(session: Session, room: Room, room_in: RoomUpdate) -> Room:
     data = room_in.dict(exclude_unset=True)
     for key, val in data.items():
         setattr(room, key, val)
-    # For demo, we could set updated_at to "18/03/25" if needed
-    # room.updated_at = "18/03/25"
     session.add(room)
     session.commit()
     session.refresh(room)

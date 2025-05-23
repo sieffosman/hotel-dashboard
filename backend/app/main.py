@@ -18,14 +18,11 @@ from .pdf import generate_room_pdf
 
 app = FastAPI(title="Hotel Dashboard API")
 
-# Create upload directories
 os.makedirs("uploads/rooms/temp", exist_ok=True)
 os.makedirs("uploads/rooms/permanent", exist_ok=True)
 
-# Serve static files
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
-# Enable CORS for frontend origin
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -37,33 +34,24 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    # create tables
     SQLModel.metadata.create_all(engine)
-    # seed data if empty
     seed_initial_data()
 
-
-# ==============================
-# IMAGE UPLOAD ENDPOINTS
-# ==============================
 
 
 @app.post("/api/upload/temp-room-image")
 async def upload_temp_image(image: UploadFile = File(...)):
     """Upload image to temporary folder"""
     try:
-        # Validate file type
         if not image.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="Only image files allowed")
 
-        # Generate unique filename
         file_extension = os.path.splitext(image.filename)[1]
         temp_filename = (
             f"temp_{datetime.now().timestamp()}_{uuid.uuid4().hex[:8]}{file_extension}"
         )
         temp_path = f"uploads/rooms/temp/{temp_filename}"
 
-        # Save file
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
@@ -85,32 +73,26 @@ async def finalize_room_image(
         if not temp_image_url:
             raise HTTPException(status_code=400, detail="No temp image URL provided")
 
-        # Check if room exists
         room = get_room(session, room_id)
         if not room:
             raise HTTPException(status_code=404, detail="Room not found")
 
-        # Extract filename from URL
         temp_filename = os.path.basename(temp_image_url)
         temp_path = f"uploads/rooms/temp/{temp_filename}"
 
         if not os.path.exists(temp_path):
             raise HTTPException(status_code=404, detail="Temp image not found")
 
-        # Create permanent filename
         file_extension = os.path.splitext(temp_filename)[1]
         permanent_filename = (
             f"room_{room_id}_{int(datetime.now().timestamp())}{file_extension}"
         )
         permanent_path = f"uploads/rooms/permanent/{permanent_filename}"
 
-        # Move file
         shutil.move(temp_path, permanent_path)
 
-        # Update database with permanent URL
         permanent_url = f"/uploads/rooms/permanent/{permanent_filename}"
 
-        # Update room with new image URL
         room_update = RoomUpdate(image_url=permanent_url)
         updated_room = update_room(session, room, room_update)
 

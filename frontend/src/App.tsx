@@ -26,7 +26,6 @@ function App() {
             {/* Create new room */}
             <Route path="/rooms/new" element={<RoomForm />} />
             
-            {/* Catch all - redirect to rooms */}
             <Route path="*" element={<Navigate to="/rooms" replace />} />
           </Routes>
         </div>

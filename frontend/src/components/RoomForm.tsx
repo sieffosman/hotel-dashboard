@@ -20,10 +20,8 @@ export default function RoomForm() {
     facilities_count: 0,
   });
 
-  // Dynamic list of facilities
   const [facilities, setFacilities] = useState<string[]>([""]);
 
-  // Text inputs (name, description, capacity) handler
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -34,22 +32,18 @@ export default function RoomForm() {
     }));
   };
 
-  // Single facility edit
   const handleFacilityChange = (index: number, value: string) => {
     setFacilities((prev) => prev.map((f, i) => (i === index ? value : f)));
   };
 
-  // Add a blank facility row
   const addFacility = () => {
     setFacilities((prev) => [...prev, ""]);
   };
 
-  // Trigger the hidden file input
   const handleAddImageClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Upload to temp folder and store returned URL
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -61,14 +55,12 @@ export default function RoomForm() {
       const data = new FormData();
       data.append("image", file);
 
-      // Hit your FastAPI temp‐upload endpoint
       const resp = await api.post<{ tempImageUrl: string }>(
         "api/upload/temp-room-image",
         data,
         { headers: { "Content-Type": "multipart/form-data" } },
       );
 
-      // Preview via the URL returned
       setForm((prev) => ({
         ...prev,
         image_url: resp.data.tempImageUrl,
@@ -77,12 +69,10 @@ export default function RoomForm() {
       setError("Failed to upload image");
     } finally {
       setLoading(false);
-      // Clear input so same file can be reselected
       e.target.value = "";
     }
   };
 
-  // Create room, then finalize image if it was uploaded to temp
   const handleSubmit = async () => {
     if (!form.name || !form.description) {
       setError("Title and description are required");
@@ -93,7 +83,6 @@ export default function RoomForm() {
     setError(null);
 
     try {
-      // 1) Create the DB record
       const submitData = {
         ...form,
         facilities_count: facilities.filter((f) => f.trim()).length,
@@ -103,14 +92,12 @@ export default function RoomForm() {
         submitData,
       );
 
-      // 2) If image came from temp, move it to permanent
       if (form.image_url.includes("/uploads/rooms/temp/")) {
         await api.post(`api/rooms/${created.id}/finalize-image`, {
           tempImageUrl: form.image_url,
         });
       }
 
-      // 3) Navigate away on success
       nav("/rooms");
     } catch {
       setError("Failed to create room");
@@ -121,7 +108,6 @@ export default function RoomForm() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* hidden file input */}
       <input
         type="file"
         accept="image/*"
@@ -148,7 +134,6 @@ export default function RoomForm() {
               Room details
             </h2>
 
-            {/* Title */}
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-2">Title</label>
               <input
@@ -162,7 +147,6 @@ export default function RoomForm() {
               />
             </div>
 
-            {/* Description */}
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-2">
                 Description
@@ -177,7 +161,6 @@ export default function RoomForm() {
               />
             </div>
 
-            {/* Image upload & preview */}
             <div className="mb-6">
               <label className="block text-sm text-gray-600 mb-2">Image</label>
 

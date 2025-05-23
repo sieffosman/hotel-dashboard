@@ -1,4 +1,3 @@
-// frontend/src/components/LeftNav.tsx
 import { Link, useLocation } from "react-router-dom";
 import logoImage from "../../assets/theHugoLogo.png";
 import homeImage from "../../assets/homeImage.png";
@@ -10,7 +9,6 @@ export default function LeftNav() {
 
   return (
     <nav className="w-64 h-screen bg-gray-800 text-white flex flex-col">
-      {/* Hugo Hotel Logo/Brand */}
       <div className="p-6">
         <div className="flex justify-center">
           <img src={logoImage} alt="The Hugo logo" className="h-12 w-auto" />
