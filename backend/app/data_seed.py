@@ -26,7 +26,7 @@ def seed_initial_data():
                     description="Style and beauty with double bed, walk-in shower and daily servicing.", 
                     capacity=2, 
                     facilities_count=12,
-                    image_url="/uploads/rooms/permanent/theHugoHotelLuxuryDoubleRoomAlt.webp",  # ✅ Fixed typo + added /
+                    image_url="/uploads/rooms/permanent/theHugoHotelLuxuryDoubleRoomAlt.webp",
                     created_at="17/03/25",
                     updated_at="18/03/25"
                 ),

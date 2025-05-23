@@ -101,81 +101,79 @@ export default function Listing() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">All rooms</h1>
+        <h1 className="header-text">All rooms</h1>
         <Link
           to="/rooms/new"
-          className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+          className="btn-primary"
         >
           CREATE A ROOM
         </Link>
       </div>
+{/* Table */}
+<div>
+  {/* Table Header */}
+  <div className="grid grid-cols-5 gap-6 py-3 px-4 text-sm font-medium text-gray-900 border-b border-gray-200">
+    <div>Room</div>
+    <div>Description</div>
+    <div>Facilities</div>
+    <div>Created</div>
+    <div>Updated</div>
+  </div>
 
-      {/* Table */}
-      <div className="bg-white border border-gray-200">
-        {/* Table Header */}
-        <div className="grid grid-cols-5 gap-6 py-3 px-4 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-900">
-          <div>Room</div>
-          <div>Description</div>
-          <div>Facilities</div>
-          <div>Created</div>
-          <div>Updated</div>
-        </div>
-
-        {/* Table Rows */}
-        <div className="divide-y divide-gray-200">
-          {rooms.length === 0 ? (
-            <div className="py-8 px-4 text-center text-gray-500">
-              No rooms available
-            </div>
-          ) : (
-            // Reverse the order so No. 4 is at top, No. 1 at bottom
-            [...rooms].reverse().map((room, index) => {
-              // Extra safety for each room object
-              if (!room || typeof room !== 'object') {
-                console.error(`Room at index ${index} is invalid:`, room);
-                return (
-                  <div key={index} className="py-3 px-4 text-red-500">
-                    Invalid room data at index {index}
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  key={room.id || index}
-                  to={`/rooms/${room.id || 'unknown'}`}
-                  className="grid grid-cols-5 gap-6 py-3 px-4 hover:bg-gray-50 transition-colors cursor-pointer group"
-                >
-                  {/* Room Name */}
-                  <div className="text-gray-900 font-medium group-hover:text-red-600">
-                    No. {room.id || '?'} {room.name || 'Unknown Room'}
-                  </div>
-
-                  {/* Description */}
-                  <div className="text-gray-700 text-sm">
-                    {room.description || 'No description available'}
-                  </div>
-
-                  {/* Facilities count */}
-                  <div className="text-gray-700 text-sm">
-                    {room.facilities_count || 0}
-                  </div>
-
-                  {/* Created date */}
-                  <div className="text-gray-700 text-sm">
-                    {room.created_at || "-"}
-                  </div>
-
-                  {/* Updated date */}
-                  <div className="text-gray-700 text-sm">
-                    {room.updated_at || "-"}
-                  </div>
-                </Link>
-              );
-            })
-          )}
-        </div>
+  {/* Table Rows */}
+  <div>
+    {rooms.length === 0 ? (
+      <div className="py-8 px-4 text-center text-gray-500">
+        No rooms available
       </div>
+    ) : (
+      [...rooms].reverse().map((room, index) => {
+        // Extra safety for each room object
+        if (!room || typeof room !== 'object') {
+          console.error(`Room at index ${index} is invalid:`, room);
+          return (
+            <div key={index} className="py-3 px-4 text-red-500 border-b border-gray-200">
+              Invalid room data at index {index}
+            </div>
+          );
+        }
+
+        return (
+          <Link
+            key={room.id || index}
+            to={`/rooms/${room.id || 'unknown'}`}
+            className="grid grid-cols-5 gap-6 py-3 px-4 hover:bg-gray-50 transition-colors cursor-pointer group border-b border-gray-200"
+          >
+            {/* Room Name */}
+            <div className="text-gray-900 font-medium group-hover:text-red-600">
+              No. {room.id || '?'} {room.name || 'Unknown Room'}
+            </div>
+
+            {/* Description */}
+            <div className="text-gray-700 text-sm">
+              {room.description || 'No description available'}
+            </div>
+
+            {/* Facilities count */}
+            <div className="text-gray-700 text-sm">
+              {room.facilities_count || 0}
+            </div>
+
+            {/* Created date */}
+            <div className="text-gray-700 text-sm">
+              {room.created_at || "-"}
+            </div>
+
+            {/* Updated date */}
+            <div className="text-gray-700 text-sm">
+              {room.updated_at || "-"}
+            </div>
+          </Link>
+        );
+      })
+    )}
+  </div>
+</div>
     </div>
   );
 }

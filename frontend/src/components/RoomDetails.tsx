@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// src/components/RoomDetails.tsx
+import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import type { RoomRead, RoomUpdate } from '../types';
@@ -7,157 +8,130 @@ import Popup from './Popup';
 export default function RoomDetails() {
   const { id } = useParams<{ id: string }>();
   const nav = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [room, setRoom] = useState<RoomRead | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
-  
-  const [formData, setFormData] = useState({
+
+  // Form state for editing (if you allow edits)
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    capacity: number;
+    image_url: string;
+    facilities: string[];
+  }>({
     name: '',
     description: '',
-    facilities: ['King sized bed', 'Air conditioning', 'Sitting area'],
     capacity: 2,
-    image_url: ''
+    image_url: '',
+    facilities: [],
   });
 
+  // Load room on mount
   useEffect(() => {
     if (!id) return;
     api.get<RoomRead>(`/rooms/${id}`)
       .then(r => {
-        console.log('🔍 Room data from API:', r.data);
-        console.log('🖼️ Image URL from database:', r.data.image_url);
-        console.log('🌐 Full image URL will be:', `http://localhost:8000${r.data.image_url}`);
-        
         setRoom(r.data);
         setFormData({
           name: r.data.name || '',
           description: r.data.description || '',
-          facilities: ['King sized bed', 'Air conditioning', 'Sitting area'], // Always start with default facilities
           capacity: r.data.capacity || 2,
-          image_url: r.data.image_url || ''
+          image_url: r.data.image_url || '',
+          facilities: r.data.facilities || [],
         });
       })
-      .catch(err => {
-        console.log('Error loading room:', err);
-        setError('Room not found');
-      })
+      .catch(() => setError('Room not found'))
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleSave = async () => {
-    if (!id) return;
-    try {
-      const updateData: RoomUpdate = {
-        name: formData.name,
-        description: formData.description,
-        facilities_count: formData.facilities.filter(f => f.trim()).length,
-        image_url: formData.image_url
-      };
-      
-      await api.patch(`/rooms/${id}`, updateData);
-      
-      // Generate PDF
-      try {
-        await api.post(`/rooms/${id}/generate-pdf`);
-      } catch (pdfError) {
-        console.log('PDF generation failed:', pdfError);
-      }
-      
-      nav('/rooms');
-    } catch (err) {
-      console.log('Failed to save room:', err);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!id) return;
-    try {
-      await api.delete(`/rooms/${id}`);
-      nav('/rooms');
-    } catch (err) {
-      setError('Failed to delete room');
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Handlers for text fields (if you support editing here)
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFacilityChange = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      facilities: prev.facilities.map((facility, i) => i === index ? value : facility)
+      facilities: prev.facilities.map((f, i) => (i === index ? value : f))
     }));
   };
 
   const addFacility = () => {
-    setFormData(prev => ({
-      ...prev,
-      facilities: [...prev.facilities, '']
-    }));
+    setFormData(prev => ({ ...prev, facilities: [...prev.facilities, ''] }));
   };
 
+  // Handle deleting
+  const handleDelete = async () => {
+    if (!id) return;
+    try {
+      await api.delete(`/rooms/${id}`);
+      nav('/rooms');
+    } catch {
+      setError('Failed to delete room');
+    }
+  };
+
+  // Download the PDF as a blob and trigger browser save
+  const handleDownloadPdf = async () => {
+    if (!id) return;
+    try {
+      const resp = await api.post(
+        `/rooms/${id}/generate-pdf`,
+        {},
+        { responseType: 'blob' }
+      );
+      const blob = new Blob([resp.data], { type: 'application/pdf' });
+      const url  = window.URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href       = url;
+      a.download   = `room_${id}_${room?.name.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setError('Could not download PDF');
+    }
+  };
+
+  // Show loading / error
   if (loading) return <div className="p-8 text-gray-600">Loading…</div>;
+  if (error)   return <div className="p-8 text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 w-16 h-full bg-gray-800 flex flex-col items-center py-4">
-        <div className="w-8 h-8 bg-gray-600 mb-8 flex items-center justify-center">
-          <span className="text-white text-xs font-bold">H</span>
-        </div>
-        <div className="text-white text-xs">HUGO</div>
-        <div className="text-gray-400 text-xs mt-1">CATERBURY</div>
-        
-        <div className="mt-8">
-          <button 
-            onClick={() => nav('/rooms')}
-            className="flex items-center gap-2 text-white hover:text-red-400 text-sm"
-          >
-            🏠 Room list
-          </button>
-        </div>
-      </div>
+
 
       {/* Main Content */}
       <div className="ml-16 p-8">
-        {/* Main Heading */}
         <h1 className="text-2xl font-normal text-gray-900 mb-4">Room details</h1>
-        
-        {/* Back to Rooms Link */}
-        <button 
+        <button
           onClick={() => nav('/rooms')}
           className="text-red-600 hover:text-red-700 text-sm font-medium mb-8"
         >
           &lt; back to rooms
         </button>
-        
+
         <div className="grid grid-cols-3 gap-8">
-          {/* Left Column - Form */}
+          {/* Left Column */}
           <div className="col-span-2">
-            {/* Room Details Section */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-medium text-gray-900">Room details</h2>
-              <div className="flex items-center gap-2">
-                <img 
-                  src="/frontend/assets/deleteIcon.png" 
-                  alt="Delete" 
-                  className="w-4 h-4"
-                />
-                <button 
-                  onClick={() => setShowDeletePopup(true)}
-                  className="text-red-600 hover:text-red-700 text-sm font-medium"
-                >
-                  DELETE ROOM
-                </button>
-              </div>
+              <button
+                onClick={() => setShowDeletePopup(true)}
+                className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium"
+              >
+                <img src="../../assets/deleteIcon.png" alt="Delete" className="w-4 h-4" />
+                DELETE ROOM
+              </button>
             </div>
-            
-            {/* Title field */}
+
+            {/* Title */}
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-2">Title</label>
               <input
@@ -169,7 +143,7 @@ export default function RoomDetails() {
               />
             </div>
 
-            {/* Description field */}
+            {/* Description */}
             <div className="mb-4">
               <label className="block text-sm text-gray-600 mb-2">Description</label>
               <textarea
@@ -180,68 +154,80 @@ export default function RoomDetails() {
               />
             </div>
 
-            {/* Image Section */}
+            {/* Image Preview */}
             <div className="mb-6">
               <label className="block text-sm text-gray-600 mb-2">Image</label>
-              
-              {/* Show existing image if available */}
               {formData.image_url ? (
                 <div className="mb-3">
-                  <img 
-                    src={`http://localhost:8000${formData.image_url}`} 
+                  <img
+                    src={`http://localhost:8000${formData.image_url}`}
                     alt="Room preview"
                     className="w-48 h-32 object-cover border border-gray-200 rounded"
                   />
-                  <div className="flex items-center gap-3 mt-3">
-                    <img 
-                      src="/frontend/assets/plusIcon.png" 
-                      alt="Add" 
-                      className="w-6 h-6"
-                    />
-                    <button className="text-red-600 hover:text-red-700 text-sm font-medium">
-                      CHANGE IMAGE
-                    </button>
-                  </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <img 
-                    src="/frontend/assets/plusIcon.png" 
-                    alt="Add" 
+                  <img
+                    src="/frontend/assets/plusIcon.png"
+                    alt="Add"
                     className="w-6 h-6"
                   />
-                  <button className="text-red-600 hover:text-red-700 text-sm font-medium">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
                     ADD IMAGE
                   </button>
                 </div>
               )}
+              {/* Hidden file input */}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={async (e: ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setLoading(true);
+                  setError(null);
+                  try {
+                    const data = new FormData();
+                    data.append('image', file);
+                    const resp = await api.post<{ tempImageUrl: string }>(
+                      '/upload/temp-room-image',
+                      data,
+                      { headers: { 'Content-Type': 'multipart/form-data' } }
+                    );
+                    setFormData(prev => ({ ...prev, image_url: resp.data.tempImageUrl }));
+                  } catch {
+                    setError('Failed to upload image');
+                  } finally {
+                    setLoading(false);
+                    e.target.value = '';
+                  }
+                }}
+              />
             </div>
 
-            {/* Facilities Section */}
+            {/* Facilities */}
             <h2 className="text-lg font-medium text-gray-900 mb-4">Facilities</h2>
-            
-            {/* Facility fields */}
-            {formData.facilities.map((facility, index) => (
-              <div key={index} className="mb-4">
+            {formData.facilities.map((f, idx) => (
+              <div key={idx} className="mb-4">
                 <label className="block text-sm text-gray-600 mb-2">Facility</label>
                 <input
                   type="text"
-                  value={facility}
-                  onChange={(e) => handleFacilityChange(index, e.target.value)}
+                  value={f}
+                  onChange={e => handleFacilityChange(idx, e.target.value)}
                   className="w-full p-3 bg-gray-100 border-0 text-gray-900"
                   placeholder="Facility detail..."
                 />
               </div>
             ))}
-
-            {/* Add Facility */}
             <div className="flex items-center gap-3 mb-8">
-              <img 
-                src="/frontend/assets/plusIcon.png" 
-                alt="Add" 
-                className="w-6 h-6"
-              />
-              <button 
+              <img src="../../assets/plusIcon.png" alt="Add" className="w-6 h-6" />
+              <button
                 onClick={addFacility}
                 className="text-red-600 hover:text-red-700 text-sm font-medium"
               >
@@ -249,15 +235,31 @@ export default function RoomDetails() {
               </button>
             </div>
 
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 text-red-600 text-sm">{error}</div>
-            )}
+            {/* Error */}
+            {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
 
-            {/* Save and Generate PDF button */}
+            {/* SAVE & GENERATE PDF (edits + PDF) */}
             <div className="pt-4">
               <button
-                onClick={handleSave}
+                onClick={async () => {
+                  setLoading(true);
+                  setError(null);
+                  try {
+                    const updateData: RoomUpdate = {
+                      name: formData.name,
+                      description: formData.description,
+                      facilities_count: formData.facilities.filter(x => x.trim()).length,
+                      image_url: formData.image_url,
+                    };
+                    await api.patch(`/rooms/${id}`, updateData);
+                    await api.post(`/rooms/${id}/generate-pdf`);
+                    nav('/rooms');
+                  } catch {
+                    setError('Failed to save room');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
                 disabled={loading}
                 className="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition-colors disabled:bg-red-400 uppercase font-medium"
               >
@@ -266,7 +268,7 @@ export default function RoomDetails() {
             </div>
           </div>
 
-          {/* Right Column - Dates */}
+          {/* Right Column */}
           <div className="col-span-1">
             <div className="bg-gray-200 p-6 mb-4">
               <h3 className="font-medium text-gray-900 mb-4">Dates</h3>
@@ -281,16 +283,16 @@ export default function RoomDetails() {
                 </div>
               </div>
             </div>
-            
-            {/* Download PDF Button */}
-            <button 
-              onClick={() => api.post(`/rooms/${id}/generate-pdf`)}
+
+            {/* DOWNLOAD PDF */}
+            <button
+              onClick={handleDownloadPdf}
               className="w-full bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
             >
               DOWNLOAD PDF
-              <img 
-                src="/frontend/assets/downloadIcon.png" 
-                alt="Download" 
+              <img
+                src="../../assets/downloadIcon.png"
+                alt="Download"
                 className="w-4 h-4"
               />
             </button>
@@ -298,7 +300,7 @@ export default function RoomDetails() {
         </div>
       </div>
 
-      {/* Delete Confirmation Popup */}
+      {/* DELETE POPUP */}
       {showDeletePopup && (
         <Popup
           title="Are you sure?"

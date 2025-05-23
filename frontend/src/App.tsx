@@ -12,7 +12,7 @@ function App() {
         <LeftNav />
         
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto p-10">
           <Routes>
             {/* Default redirect to rooms list */}
             <Route path="/" element={<Navigate to="/rooms" replace />} />

@@ -1,5 +1,4 @@
 // frontend/src/components/LeftNav.tsx
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoImage from '../../assets/theHugoLogo.png';
 import homeImage from '../../assets/homeImage.png';
@@ -30,9 +29,9 @@ export default function LeftNav() {
                 <Link
                   to={item.path}
                   className={`
-                    flex items-center space-x-3 px-4 py-3 transition-colors duration-200 relative
+                    flex items-center space-x-3 px-4 py-3 transition-colors duration-200 relative border-l-4 border-red
                     ${isActive 
-                      ? 'text-white border-l-4 border-red-600' 
+                      ? 'text-white' 
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                     }
                   `}
