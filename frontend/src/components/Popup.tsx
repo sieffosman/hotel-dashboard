@@ -1,5 +1,5 @@
 // frontend/src/components/Popup.tsx
-import React from 'react';
+import React from "react";
 
 interface PopupProps {
   title: string;
@@ -8,13 +8,18 @@ interface PopupProps {
   onCancel: () => void;
 }
 
-export default function Popup({ title, message, onConfirm, onCancel }: PopupProps) {
+export default function Popup({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: PopupProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-8 max-w-md w-full mx-4 shadow-lg">
         <h2 className="text-xl font-medium text-gray-900 mb-4">{title}</h2>
         <p className="text-gray-700 mb-8">{message}</p>
-        
+
         <div className="flex gap-3">
           <button
             onClick={onConfirm}

@@ -1,9 +1,9 @@
 // src/components/RoomDetails.tsx
-import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api';
-import type { RoomRead, RoomUpdate } from '../types';
-import Popup from './Popup';
+import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../api";
+import type { RoomRead, RoomUpdate } from "../types";
+import Popup from "./Popup";
 
 export default function RoomDetails() {
   const { id } = useParams<{ id: string }>();
@@ -23,46 +23,49 @@ export default function RoomDetails() {
     image_url: string;
     facilities: string[];
   }>({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     capacity: 2,
-    image_url: '',
+    image_url: "",
     facilities: [],
   });
 
   // Load room on mount
   useEffect(() => {
     if (!id) return;
-    api.get<RoomRead>(`/rooms/${id}`)
-      .then(r => {
+    api
+      .get<RoomRead>(`/rooms/${id}`)
+      .then((r) => {
         setRoom(r.data);
         setFormData({
-          name: r.data.name || '',
-          description: r.data.description || '',
+          name: r.data.name || "",
+          description: r.data.description || "",
           capacity: r.data.capacity || 2,
-          image_url: r.data.image_url || '',
+          image_url: r.data.image_url || "",
           facilities: r.data.facilities || [],
         });
       })
-      .catch(() => setError('Room not found'))
+      .catch(() => setError("Room not found"))
       .finally(() => setLoading(false));
   }, [id]);
 
   // Handlers for text fields (if you support editing here)
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFacilityChange = (index: number, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      facilities: prev.facilities.map((f, i) => (i === index ? value : f))
+      facilities: prev.facilities.map((f, i) => (i === index ? value : f)),
     }));
   };
 
   const addFacility = () => {
-    setFormData(prev => ({ ...prev, facilities: [...prev.facilities, ''] }));
+    setFormData((prev) => ({ ...prev, facilities: [...prev.facilities, ""] }));
   };
 
   // Handle deleting
@@ -70,9 +73,9 @@ export default function RoomDetails() {
     if (!id) return;
     try {
       await api.delete(`/rooms/${id}`);
-      nav('/rooms');
+      nav("/rooms");
     } catch {
-      setError('Failed to delete room');
+      setError("Failed to delete room");
     }
   };
 
@@ -83,35 +86,35 @@ export default function RoomDetails() {
       const resp = await api.post(
         `/rooms/${id}/generate-pdf`,
         {},
-        { responseType: 'blob' }
+        { responseType: "blob" },
       );
-      const blob = new Blob([resp.data], { type: 'application/pdf' });
-      const url  = window.URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href       = url;
-      a.download   = `room_${id}_${room?.name.replace(/\s+/g, '_')}.pdf`;
+      const blob = new Blob([resp.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `room_${id}_${room?.name.replace(/\s+/g, "_")}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      setError('Could not download PDF');
+      setError("Could not download PDF");
     }
   };
 
   // Show loading / error
   if (loading) return <div className="p-8 text-gray-600">Loading…</div>;
-  if (error)   return <div className="p-8 text-red-600">{error}</div>;
+  if (error) return <div className="p-8 text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen bg-white">
-
-
       {/* Main Content */}
       <div className="ml-16 p-8">
-        <h1 className="text-2xl font-normal text-gray-900 mb-4">Room details</h1>
+        <h1 className="text-2xl font-normal text-gray-900 mb-4">
+          Room details
+        </h1>
         <button
-          onClick={() => nav('/rooms')}
+          onClick={() => nav("/rooms")}
           className="text-red-600 hover:text-red-700 text-sm font-medium mb-8"
         >
           &lt; back to rooms
@@ -121,12 +124,18 @@ export default function RoomDetails() {
           {/* Left Column */}
           <div className="col-span-2">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-medium text-gray-900">Room details</h2>
+              <h2 className="text-lg font-medium text-gray-900">
+                Room details
+              </h2>
               <button
                 onClick={() => setShowDeletePopup(true)}
                 className="flex items-center gap-2 text-red-600 hover:text-red-700 text-sm font-medium"
               >
-                <img src="../../assets/deleteIcon.png" alt="Delete" className="w-4 h-4" />
+                <img
+                  src="../../assets/deleteIcon.png"
+                  alt="Delete"
+                  className="w-4 h-4"
+                />
                 DELETE ROOM
               </button>
             </div>
@@ -145,7 +154,9 @@ export default function RoomDetails() {
 
             {/* Description */}
             <div className="mb-4">
-              <label className="block text-sm text-gray-600 mb-2">Description</label>
+              <label className="block text-sm text-gray-600 mb-2">
+                Description
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -194,39 +205,50 @@ export default function RoomDetails() {
                   setError(null);
                   try {
                     const data = new FormData();
-                    data.append('image', file);
+                    data.append("image", file);
                     const resp = await api.post<{ tempImageUrl: string }>(
-                      '/upload/temp-room-image',
+                      "/upload/temp-room-image",
                       data,
-                      { headers: { 'Content-Type': 'multipart/form-data' } }
+                      { headers: { "Content-Type": "multipart/form-data" } },
                     );
-                    setFormData(prev => ({ ...prev, image_url: resp.data.tempImageUrl }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      image_url: resp.data.tempImageUrl,
+                    }));
                   } catch {
-                    setError('Failed to upload image');
+                    setError("Failed to upload image");
                   } finally {
                     setLoading(false);
-                    e.target.value = '';
+                    e.target.value = "";
                   }
                 }}
               />
             </div>
 
             {/* Facilities */}
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Facilities</h2>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">
+              Facilities
+            </h2>
             {formData.facilities.map((f, idx) => (
               <div key={idx} className="mb-4">
-                <label className="block text-sm text-gray-600 mb-2">Facility</label>
+                <label className="block text-sm text-gray-600 mb-2">
+                  Facility
+                </label>
                 <input
                   type="text"
                   value={f}
-                  onChange={e => handleFacilityChange(idx, e.target.value)}
+                  onChange={(e) => handleFacilityChange(idx, e.target.value)}
                   className="w-full p-3 bg-gray-100 border-0 text-gray-900"
                   placeholder="Facility detail..."
                 />
               </div>
             ))}
             <div className="flex items-center gap-3 mb-8">
-              <img src="../../assets/plusIcon.png" alt="Add" className="w-6 h-6" />
+              <img
+                src="../../assets/plusIcon.png"
+                alt="Add"
+                className="w-6 h-6"
+              />
               <button
                 onClick={addFacility}
                 className="text-red-600 hover:text-red-700 text-sm font-medium"
@@ -248,14 +270,16 @@ export default function RoomDetails() {
                     const updateData: RoomUpdate = {
                       name: formData.name,
                       description: formData.description,
-                      facilities_count: formData.facilities.filter(x => x.trim()).length,
+                      facilities_count: formData.facilities.filter((x) =>
+                        x.trim(),
+                      ).length,
                       image_url: formData.image_url,
                     };
                     await api.patch(`/rooms/${id}`, updateData);
                     await api.post(`/rooms/${id}/generate-pdf`);
-                    nav('/rooms');
+                    nav("/rooms");
                   } catch {
-                    setError('Failed to save room');
+                    setError("Failed to save room");
                   } finally {
                     setLoading(false);
                   }
@@ -263,7 +287,7 @@ export default function RoomDetails() {
                 disabled={loading}
                 className="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition-colors disabled:bg-red-400 uppercase font-medium"
               >
-                {loading ? 'SAVING...' : 'SAVE AND GENERATE PDF'}
+                {loading ? "SAVING..." : "SAVE AND GENERATE PDF"}
               </button>
             </div>
           </div>
@@ -275,11 +299,11 @@ export default function RoomDetails() {
               <div className="flex gap-8">
                 <div>
                   <div className="text-gray-600 text-sm">Created</div>
-                  <div className="text-gray-900">{room?.created_at || '-'}</div>
+                  <div className="text-gray-900">{room?.created_at || "-"}</div>
                 </div>
                 <div>
                   <div className="text-gray-600 text-sm">Updated</div>
-                  <div className="text-gray-900">{room?.updated_at || '-'}</div>
+                  <div className="text-gray-900">{room?.updated_at || "-"}</div>
                 </div>
               </div>
             </div>

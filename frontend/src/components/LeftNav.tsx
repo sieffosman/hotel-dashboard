@@ -1,14 +1,12 @@
 // frontend/src/components/LeftNav.tsx
-import { Link, useLocation } from 'react-router-dom';
-import logoImage from '../../assets/theHugoLogo.png';
-import homeImage from '../../assets/homeImage.png';
+import { Link, useLocation } from "react-router-dom";
+import logoImage from "../../assets/theHugoLogo.png";
+import homeImage from "../../assets/homeImage.png";
 
 export default function LeftNav() {
   const location = useLocation();
-  
-  const navItems = [
-    { path: '/rooms', label: 'Room list', icon: homeImage }
-  ];
+
+  const navItems = [{ path: "/rooms", label: "Room list", icon: homeImage }];
 
   return (
     <nav className="w-64 h-screen bg-gray-800 text-white flex flex-col">
@@ -30,17 +28,14 @@ export default function LeftNav() {
                   to={item.path}
                   className={`
                     flex items-center space-x-3 px-4 py-3 transition-colors duration-200 relative border-l-4 border-red
-                    ${isActive 
-                      ? 'text-white' 
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    ${
+                      isActive
+                        ? "text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }
                   `}
                 >
-                  <img 
-                    src={item.icon} 
-                    alt="" 
-                    className="w-5 h-5"
-                  />
+                  <img src={item.icon} alt="" className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
                 </Link>
               </li>

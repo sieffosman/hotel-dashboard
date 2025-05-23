@@ -1,7 +1,7 @@
-import React, { useState, useRef, ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api';
-import type { RoomCreate } from '../types';
+import React, { useState, useRef, ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
+import type { RoomCreate } from "../types";
 
 export default function RoomForm() {
   const nav = useNavigate();
@@ -13,22 +13,22 @@ export default function RoomForm() {
 
   // Main form data
   const [form, setForm] = useState<RoomCreate>({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     capacity: 2,
-    image_url: '',
+    image_url: "",
     facilities_count: 0,
   });
 
   // Dynamic list of facilities
-  const [facilities, setFacilities] = useState<string[]>(['']);
+  const [facilities, setFacilities] = useState<string[]>([""]);
 
   // Text inputs (name, description, capacity) handler
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -36,14 +36,12 @@ export default function RoomForm() {
 
   // Single facility edit
   const handleFacilityChange = (index: number, value: string) => {
-    setFacilities(prev =>
-      prev.map((f, i) => (i === index ? value : f))
-    );
+    setFacilities((prev) => prev.map((f, i) => (i === index ? value : f)));
   };
 
   // Add a blank facility row
   const addFacility = () => {
-    setFacilities(prev => [...prev, '']);
+    setFacilities((prev) => [...prev, ""]);
   };
 
   // Trigger the hidden file input
@@ -52,9 +50,7 @@ export default function RoomForm() {
   };
 
   // Upload to temp folder and store returned URL
-  const handleImageUpload = async (
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -63,33 +59,33 @@ export default function RoomForm() {
 
     try {
       const data = new FormData();
-      data.append('image', file);
+      data.append("image", file);
 
       // Hit your FastAPI temp‐upload endpoint
       const resp = await api.post<{ tempImageUrl: string }>(
-        'api/upload/temp-room-image',
+        "api/upload/temp-room-image",
         data,
-        { headers: { 'Content-Type': 'multipart/form-data' } }
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
 
       // Preview via the URL returned
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
         image_url: resp.data.tempImageUrl,
       }));
     } catch {
-      setError('Failed to upload image');
+      setError("Failed to upload image");
     } finally {
       setLoading(false);
       // Clear input so same file can be reselected
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
   // Create room, then finalize image if it was uploaded to temp
   const handleSubmit = async () => {
     if (!form.name || !form.description) {
-      setError('Title and description are required');
+      setError("Title and description are required");
       return;
     }
 
@@ -100,22 +96,24 @@ export default function RoomForm() {
       // 1) Create the DB record
       const submitData = {
         ...form,
-        facilities_count: facilities.filter(f => f.trim()).length,
+        facilities_count: facilities.filter((f) => f.trim()).length,
       };
-      const { data: created } = await api.post<{ id: number }>('/rooms', submitData);
+      const { data: created } = await api.post<{ id: number }>(
+        "/rooms",
+        submitData,
+      );
 
       // 2) If image came from temp, move it to permanent
-      if (form.image_url.includes('/uploads/rooms/temp/')) {
-        await api.post(
-          `api/rooms/${created.id}/finalize-image`,
-          { tempImageUrl: form.image_url }
-        );
+      if (form.image_url.includes("/uploads/rooms/temp/")) {
+        await api.post(`api/rooms/${created.id}/finalize-image`, {
+          tempImageUrl: form.image_url,
+        });
       }
 
       // 3) Navigate away on success
-      nav('/rooms');
+      nav("/rooms");
     } catch {
-      setError('Failed to create room');
+      setError("Failed to create room");
     } finally {
       setLoading(false);
     }
@@ -137,7 +135,7 @@ export default function RoomForm() {
           Room details
         </h1>
         <button
-          onClick={() => nav('/rooms')}
+          onClick={() => nav("/rooms")}
           className="text-red-600 hover:text-red-700 text-sm font-medium mb-8"
         >
           &lt; back to rooms
@@ -152,9 +150,7 @@ export default function RoomForm() {
 
             {/* Title */}
             <div className="mb-4">
-              <label className="block text-sm text-gray-600 mb-2">
-                Title
-              </label>
+              <label className="block text-sm text-gray-600 mb-2">Title</label>
               <input
                 name="name"
                 type="text"
@@ -183,9 +179,7 @@ export default function RoomForm() {
 
             {/* Image upload & preview */}
             <div className="mb-6">
-              <label className="block text-sm text-gray-600 mb-2">
-                Image
-              </label>
+              <label className="block text-sm text-gray-600 mb-2">Image</label>
 
               {form.image_url ? (
                 <div className="mb-3">
@@ -239,9 +233,7 @@ export default function RoomForm() {
                 <input
                   type="text"
                   value={facility}
-                  onChange={e =>
-                    handleFacilityChange(idx, e.target.value)
-                  }
+                  onChange={(e) => handleFacilityChange(idx, e.target.value)}
                   className="w-full p-3 bg-gray-100 border-0 text-gray-900"
                   placeholder="Facility detail..."
                 />
@@ -263,9 +255,7 @@ export default function RoomForm() {
             </div>
 
             {/* Error */}
-            {error && (
-              <div className="mb-4 text-red-600 text-sm">{error}</div>
-            )}
+            {error && <div className="mb-4 text-red-600 text-sm">{error}</div>}
 
             {/* Submit */}
             <div className="pt-4">
@@ -274,7 +264,7 @@ export default function RoomForm() {
                 disabled={loading}
                 className="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition-colors disabled:bg-red-400 uppercase font-medium"
               >
-                {loading ? 'CREATING...' : 'CREATE AND GENERATE PDF'}
+                {loading ? "CREATING..." : "CREATE AND GENERATE PDF"}
               </button>
             </div>
           </div>

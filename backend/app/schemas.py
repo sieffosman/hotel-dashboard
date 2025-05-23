@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
+
 class RoomBase(BaseModel):
     name: str
     description: str
@@ -8,8 +9,10 @@ class RoomBase(BaseModel):
     image_url: Optional[str] = None
     facilities_count: int
 
+
 class RoomCreate(RoomBase):
     pass
+
 
 class RoomUpdate(BaseModel):
     name: Optional[str] = None
@@ -17,6 +20,7 @@ class RoomUpdate(BaseModel):
     capacity: Optional[int] = None
     image_url: Optional[str] = None
     facilities_count: Optional[int] = None
+
 
 class RoomRead(RoomBase):
     id: int

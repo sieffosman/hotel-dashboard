@@ -9,6 +9,7 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
+
 # Dependency for FastAPI routes
 def get_session():
     with Session(engine) as session:

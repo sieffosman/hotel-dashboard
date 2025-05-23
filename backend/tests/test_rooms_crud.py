@@ -12,6 +12,7 @@ test_engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
+
 @pytest.fixture(scope="module")
 def client():
     """
@@ -25,6 +26,7 @@ def client():
     def get_test_session():
         with Session(test_engine) as session:
             yield session
+
     app.dependency_overrides[get_session_dep] = get_test_session
 
     # Use TestClient context manager to ensure startup/shutdown events fire

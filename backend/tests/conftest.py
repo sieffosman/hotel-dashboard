@@ -12,13 +12,16 @@ test_engine = create_engine(
     "sqlite:///:memory:", connect_args={"check_same_thread": False}
 )
 
+
 # Create all tables before any tests run
 def setup_module(module):
     SQLModel.metadata.create_all(test_engine)
 
+
 # Drop all tables after tests complete
 def teardown_module(module):
     SQLModel.metadata.drop_all(test_engine)
+
 
 @pytest.fixture(name="session")
 def session_fixture():
@@ -26,9 +29,11 @@ def session_fixture():
     with Session(test_engine) as session:
         yield session
 
+
 @pytest.fixture(name="client")
 def client_fixture(session):
     """FastAPI test client using the in-memory DB."""
+
     # Override the dependency to use our test session
     def get_test_session():
         yield session
